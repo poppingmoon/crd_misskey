@@ -3,7 +3,7 @@ import { fetchWithRetry } from "./fetch_with_retry.ts";
 
 async function getHitNum(kv: Deno.Kv, query: string): Promise<number> {
   const hitNum = await kv.get(["hitNum", query]);
-  if (typeof hitNum.value == "number") {
+  if (typeof hitNum.value == "number" && !Number.isNaN(hitNum.value)) {
     return hitNum.value;
   }
   const result = await search({ type: "reference", query, results_num: 1 });
