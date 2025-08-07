@@ -94,12 +94,16 @@ export async function search(
   for (const [key, value] of Object.entries(request)) {
     url.searchParams.append(key, value.toString());
   }
-  const result = await fetchWithRetry(url, {
+  const response = await fetchWithRetry(url, {
     headers: {
       "Content-Type": "application/xml",
       "User-Agent": "crd_misskey",
     },
   });
-  const xml = parse(await result.text());
-  return xml["result_set"] as ResultSet;
+  const xml = parse(await response.text());
+  const result = xml["result_set"] as ResultSet;
+  if (result.results_cd === "1") {
+    throw result;
+  }
+  return result;
 }
