@@ -20,10 +20,10 @@ export type RequestParameters = {
     | "special"
     | "school"
     | "archives";
-  "results_format"?: "xml" | "rss";
-  "results_get_position"?: number;
-  "results_num"?: number;
-  "sort"?:
+  results_format?: "xml" | "rss";
+  results_get_position?: number;
+  results_num?: number;
+  sort?:
     | "fit"
     | "reg-id"
     | "crt-date"
@@ -32,7 +32,7 @@ export type RequestParameters = {
     | "access-num"
     | "applause-num"
     | "pro-key";
-  "sort_order"?: "asc" | "desc";
+  sort_order?: "asc" | "desc";
 };
 
 export type ResultSet = {
@@ -57,7 +57,7 @@ export type Reference = {
   "con-type"?: string;
   bibl?: Bibl | Bibl[];
   "ans-proc"?: string;
-  "referral"?: string | string[];
+  referral?: string | string[];
   "pre-res"?: string;
   note?: string;
   "ptn-type"?: string;
