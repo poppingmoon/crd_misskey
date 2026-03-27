@@ -14,12 +14,26 @@ async function getRandomReference(query: string): Promise<Reference> {
   const kv = await Deno.openKv();
   const hitNum = await getHitNum(kv, query);
   const index = Math.floor(Math.random() * hitNum) + 1;
-  const request: RequestParameters = {
-    type: "reference",
-    query,
-    results_get_position: index,
-    results_num: 1,
-  };
+  let request: RequestParameters;
+  if (index < hitNum / 2) {
+    request = {
+      type: "reference",
+      query,
+      results_get_position: index,
+      results_num: 1,
+      sort: "reg-date",
+      sort_order: "desc",
+    };
+  } else {
+    request = {
+      type: "reference",
+      query,
+      results_get_position: hitNum - index + 1,
+      results_num: 1,
+      sort: "reg-date",
+      sort_order: "asc",
+    };
+  }
   const response = await search(request);
   await kv.set(["hitNum", query], parseInt(response.hit_num));
   const result = response.result;
