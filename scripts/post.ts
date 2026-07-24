@@ -1,9 +1,7 @@
 import { type Reference, type RequestParameters, search } from "./crd.ts";
 import { fetchWithRetry } from "./fetch_with_retry.ts";
 
-const kv = await Deno.openKv();
-
-async function getHitNum(query: string): Promise<number> {
+async function getHitNum(kv: Deno.Kv, query: string): Promise<number> {
   try {
     const hitNum = await kv.get<number>(["hitNum", query]);
     if (typeof hitNum.value == "number" && !Number.isNaN(hitNum.value)) {
@@ -17,8 +15,11 @@ async function getHitNum(query: string): Promise<number> {
   return parseInt(result.hit_num);
 }
 
-async function getRandomReference(query: string): Promise<Reference> {
-  const hitNum = await getHitNum(query);
+async function getRandomReference(
+  kv: Deno.Kv,
+  query: string,
+): Promise<Reference> {
+  const hitNum = await getHitNum(kv, query);
   const index = Math.floor(Math.random() * hitNum) + 1;
   let request: RequestParameters;
   if (index < hitNum / 2) {
@@ -76,19 +77,24 @@ async function postNote(text: string): Promise<void> {
   );
 }
 
-export async function postRandomReference(): Promise<void> {
-  const reference = await getRandomReference('reg-id = ""');
+export async function postRandomReference(kv: Deno.Kv): Promise<void> {
+  const reference = await getRandomReference(kv, 'reg-id = ""');
   const text = summarizeReference(reference);
   await postNote(text);
 }
 
-export async function postRandomUnresolvedReference(): Promise<void> {
-  const reference = await getRandomReference("solution = unresolved");
+export async function postRandomUnresolvedReference(
+  kv: Deno.Kv,
+): Promise<void> {
+  const reference = await getRandomReference(kv, "solution = unresolved");
   const text = summarizeReference(reference);
   await postNote(text);
 }
 
-export async function postAccessRanking(rank: number): Promise<void> {
+export async function postAccessRanking(
+  kv: Deno.Kv,
+  rank: number,
+): Promise<void> {
   const date = Temporal.Now.plainDateISO("Asia/Tokyo").subtract({ months: 1 });
   try {
     const text = await kv.get<string>([
@@ -142,7 +148,10 @@ export async function postAccessRanking(rank: number): Promise<void> {
   }
 }
 
-export async function postApplauseRanking(rank: number): Promise<void> {
+export async function postApplauseRanking(
+  kv: Deno.Kv,
+  rank: number,
+): Promise<void> {
   const date = Temporal.Now.plainDateISO("Asia/Tokyo").subtract({ months: 1 });
   try {
     const text = await kv.get<string>([
